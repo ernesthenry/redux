@@ -59,7 +59,16 @@ function goals(state=[], action){
     }
 }
 
-const store =createStore(todos) // we pass our reducer function to create store so that we can add todos
+function app(state ={}, action){
+    return{
+        todos: todos(state.todos, action),
+        goals: goals(state.goals,action),
+
+    }
+    
+}
+
+const store =createStore(app) // we pass our reducer function to create store so that we can add todos
 store.subscribe(()=>{
     console.log('The new state is: ', store.getState())
 })
