@@ -1,3 +1,11 @@
+function todos(state = [],action) {
+    if(action.type === "ADD_TODO"){
+        return state.concat([action.todo])
+    }
+    return state
+    
+}
+
 function  createStore() {
     // 1. The store should have four parts
     // 2. The state
