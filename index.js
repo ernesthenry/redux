@@ -6,6 +6,7 @@ function todos(state = [],action) {
     
 }
 
+
 function  createStore() {
     // 1. The store should have four parts
     // 2. The state
@@ -26,9 +27,17 @@ function  createStore() {
     }
     }
 
+    const dispatch = (action) => {
+        state = todos(state, action)
+        listeners.forEach((listener) => listener()) // returns an array of functions
+    
+    }
+    
+
     return{
         getState,
-        subscribe
+        subscribe,
+        dispatch,
     }
     
 }
