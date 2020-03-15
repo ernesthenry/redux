@@ -68,20 +68,104 @@ function app(state ={}, action){
     
 }
 
+// Appp code
+
+const ADD_TODO = 'ADD_TODO'
+const REMOVE_TODO = 'REMOVE_TODO'
+const TOGGLE_TODO = 'TOGGLE_TODO'
+const ADD_GOAL ='ADD_GOAL'
+const REMOVE_GOAL = 'REMOVE_GOAL'
+
+function addTodoAction(todo){
+    return{
+        type: ADD_TODO,
+        todo
+    }
+
+}
+
+function removeTodoAction(id){
+    return{
+        type: REMOVE_TODO,
+        id
+    }
+}
+
+function toggleTodoAction(id){
+    return{
+        type: TOGGLE_TODO,
+        id
+    }
+}
+function addGoalAction(goal){
+    return{
+        type: ADD_GOAL,
+        goal
+    }
+}
+
+function removeGoalAction(id){
+    return{
+        type: REMOVE_GOAL,
+        id
+    }
+}
+
 const store =createStore(app) // we pass our reducer function to create store so that we can add todos
 store.subscribe(()=>{
     console.log('The new state is: ', store.getState())
 })
 
+
+
 store.dispatch({ // whenever we need to update the store, call dispatch passing an action which occurred
-    type: 'ADD_TODO',
+    type: ADD_GOAL,
     todo: {
         id:0,
-        name: 'Learn redux',
+        name: 'Win the competition',
         complete: false
     }
 
 })
+store.dispatch(addTodoAction({
+    todo: {
+        id:1,
+        name: 'Learn redux',
+        complete: false
+    }
+
+}))
+store.dispatch(addTodoAction({
+    todo: {
+        id:2,
+        name: 'Wash the car',
+        complete: true
+    }
+
+}))
+
+store.dispatch(removeTodoAction(0))
+
+store.dispatch(toggleTodoAction(1))
+
+store.dispatch(addGoalAction({
+    todo: {
+        id:0,
+        name: 'Learn redux',
+    }
+
+}))
+
+store.dispatch(removeGoalAction({
+    todo: {
+        id:1,
+        name: 'Go to school',
+    }
+
+}))
+
+store.dispatch(removeGoalAction(10))
+
 
 
 
