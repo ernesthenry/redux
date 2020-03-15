@@ -1,12 +1,3 @@
-function todos(state = [],action) {
-    if(action.type === "ADD_TODO"){
-        return state.concat([action.todo])
-    }
-    return state
-    
-}
-
-
 function  createStore() {
     // 1. The store should have four parts
     // 2. The state
@@ -41,4 +32,39 @@ function  createStore() {
     }
     
 }
+
+// reducer specifies how state will change depending on the eaction that occurred in the application
+function todos(state = [],action) {
+    if(action.type === "ADD_TODO"){
+        return state.concat([action.todo])
+    }
+    elseif(action.type ==="REMOVE_TODO"){
+        return state.filter((todo) => todo.id !== action.id)
+    }
+    elseif(action.type==="TOGGLE_TODO"){
+        return state.map((todo) => todo.id !== action.id ? todo:
+        Object.assign({}, todo, {complete: !todo.complete}))
+
+    } else {
+        return state
+    }
+}
+
+const store =createStore(todos) // we pass our reducer function to create store so that we can add todos
+store.subscribe(()=>{
+    console.log('The new state is: ', store.getState())
+})
+
+store.dispatch({ // whenever we need to update the store, call dispatch passing an action which occurred
+    type: 'ADD_TODO',
+    todo: {
+        id:0,
+        name: 'Learn redux',
+        complete: false
+    }
+
+})
+
+
+
 
