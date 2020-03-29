@@ -127,6 +127,16 @@ const checker = (store) => (next) => (action) => {
     }
     
 
+const logger = (store) => (next) => (action) =>{
+    console.group(action.type)
+        console.log('The action:', action)
+        const result = next(action)
+        console.log('The new state: ', store.getState())
+
+    console.groupEnd()
+    return result
+}
+
 
 
 
@@ -134,7 +144,7 @@ const checker = (store) => (next) => (action) => {
 const store = Redux.createStore(Redux.combineReducers({
     todos, 
     goals
-}), Redux.applyMiddleware(checker)) // we pass our reducer function to create store so that we can add todos, also append middleware
+}), Redux.applyMiddleware(checker, logger)) // we pass our reducer function to create store so that we can add todos, also append middleware
 store.subscribe(()=>{
     const { goals, todos } = store.getState()
     
