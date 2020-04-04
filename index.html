@@ -211,13 +211,13 @@
         return next(action);
       };
 
-      const thunk = (store) => (next) => (action) => {
-        if(typeof action === "function"){
-          return action(store.dispatch)
-        }
-        return next(action)
+      // const thunk = (store) => (next) => (action) => {
+      //   if(typeof action === "function"){
+      //     return action(store.dispatch)
+      //   }
+      //   return next(action)
 
-      }
+      // }
 
       const logger = (store) => (next) => (action) => {
         console.group(action.type);
@@ -231,12 +231,11 @@
 
       const store = Redux.createStore(
         Redux.combineReducers({
-          thunk,
           todos,
           goals,
           loading
         }),
-        Redux.applyMiddleware(checker, logger)
+        Redux.applyMiddleware(ReduxThunk.default, checker, logger)
       ); // we pass our reducer function to create store so that we can add todos, also append middleware
   
     </script>
