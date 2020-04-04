@@ -8,6 +8,8 @@
     <script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
     <script src="https://tylermcginnis.com/goals-todos-api/index.js"></script>
+    <script src="https://unpkg.com/redux-thunk@2.2.0/dist/redux-thunk.min.js"></script>
+
   </head>
   <body>
     <div>
@@ -128,6 +130,21 @@
 
       }
 
+      function handleDeleteTodo(todo){
+        return (dispatch) => {
+          dispatch(removeTodoAction(todo.id))
+
+          return API.deleteTodo(todo.id)
+          .catch(() =>{
+            this.props.store.dispatch(addTodoAction(todo))
+            alert("An error ocurred. Try again")
+          })
+
+
+        }
+      
+      }
+
       const checker = store => next => action => {
         if (
           action.type === ADD_TODO &&
@@ -145,7 +162,15 @@
         return next(action);
       };
 
-      const logger = store => next => action => {
+      const thunk = (store) => (next) => (action) => {
+        if(typeof action === "function"){
+          return action(store.dispatch)
+        }
+        return next(action)
+
+      }
+
+      const logger = (store) => (next) => (action) => {
         console.group(action.type);
         console.log('The action:', action);
         const result = next(action);
@@ -157,6 +182,7 @@
 
       const store = Redux.createStore(
         Redux.combineReducers({
+          ReduxThunk.default,
           todos,
           goals,
           loading
@@ -291,12 +317,8 @@
           }
 
           removeItem = (todo) => {
-            this.props.store.dispatch(removeTodoAction(todo.id))
-            return API.deleteTodo(todo.id)
-            .catch(() =>{
-              this.props.store.dispatch(removeTodoAction(todo.id))
-              alert("An error ocurred. Try again")
-            })
+            this.props.store.dispatch(handleDeleteTodo(todo))
+           
            
           } 
 
@@ -308,7 +330,7 @@
                 alert("There was an error. Please try again")
 
               })
-              )}
+          }
           render(){
               return(
                   <div>
@@ -355,7 +377,7 @@
             this.props.store.dispatch(removeGoalAction(goal.id))
             return API.deleteGoal(goal.id)
             .catch(() =>{
-              this.props.store.dispatch(removeGoalAction(goal.id))
+              this.props.store.dispatch(addGoalAction(goal))
               alert("An error happened. Try again")
               
             })
