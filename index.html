@@ -48,8 +48,20 @@
                 ? todo
                 : Object.assign({}, todo, {complete: !todo.complete})
             );
+          case RECEIVE_DATA:
+            return action.todos
           default:
             return state;
+        }
+      }
+
+
+      function loading( state = true, action){
+        switch(action.type){
+          case RECEIVE_DATA:
+              return false;
+          default: 
+              return state
         }
       }
 
@@ -59,6 +71,8 @@
             return state.concat([action.goal]);
           case REMOVE_GOAL:
             return state.filter(goal => goal.id !== action.id);
+          case RECEIVE_DATA:
+            return action.goals
           default:
             return state;
         }
@@ -69,6 +83,7 @@
       const TOGGLE_TODO = 'TOGGLE_TODO';
       const ADD_GOAL = 'ADD_GOAL';
       const REMOVE_GOAL = 'REMOVE_GOAL';
+      const RECEIVE_DATA = 'RECEIVE_DATA'
 
       function addTodoAction(todo) {
         return {
@@ -104,6 +119,15 @@
         };
       }
 
+      function receiveDataAction(todos, goals){
+        return{
+          type: RECEIVE_DATA,
+          todos,
+          goals
+        }
+
+      }
+
       const checker = store => next => action => {
         if (
           action.type === ADD_TODO &&
@@ -135,6 +159,7 @@
         Redux.combineReducers({
           todos,
           goals,
+          loading
         }),
         Redux.applyMiddleware(checker, logger)
       ); // we pass our reducer function to create store so that we can add todos, also append middleware
@@ -246,6 +271,15 @@
       class Todos extends React.Component{
           addItem = (e) =>{
               e.preventDefault()
+
+              return API.saveTodo(this.input.value)
+              .then((todo) =>{
+                this.props.store.dispatch(addTodoAction(todo))
+                this.input.value = ""
+              })
+              .catch(() =>{
+                alert('There was an error. Try again')
+              })
               const name = this.input.value
               this.input.value = ""
 
@@ -258,21 +292,33 @@
 
           removeItem = (todo) => {
             this.props.store.dispatch(removeTodoAction(todo.id))
+            return API.deleteTodo(todo.id)
+            .catch(() =>{
+              this.props.store.dispatch(removeTodoAction(todo.id))
+              alert("An error ocurred. Try again")
+            })
+           
           } 
 
           toggleItem = (id) => {
-              this.props.store.dispatch(toggleTodoAction(id)
+              this.props.store.dispatch(toggleTodoAction(id))
+              return API.saveTodoToggle(id)
+              .catch(() =>{
+                this.props.store.dispatch(toggleTodoAction(id))
+                alert("There was an error. Please try again")
+
+              })
               )}
           render(){
               return(
                   <div>
                  <h1>Todo List</h1>
-                 <input
-                 type="text"
-                 placeholder="Add Todo"
-                 ref ={ (input) => this.input = input}
-                 />
-                 <button onClick={this.addItem}>Add Todo</button>
+                    <input
+                    type="text"
+                    placeholder="Add Todo"
+                    ref ={ (input) => this.input = input}
+                    />
+                    <button onClick={this.addItem}>Add Todo</button>
 
                  <List 
                  toggle={this.toggleItem}
@@ -283,12 +329,18 @@
                   </div>
               )
           }
-
       }
 
       class Goals extends React.Component{
           addItem = (e) =>{
               e.preventDefault()
+              return API.saveGoal(this.input.value)
+              .then((goal) => {
+              this.props.store.dispatch(addGoalAction(goal))
+              this.input.value = ''
+              })
+              .catch(() => alert('There was an error. Try again.'))
+            }
               const name = this.input.value
               this.input.value =""
               this.props.store.dispatch(addGoalAction({
@@ -298,7 +350,14 @@
           }
 
           removeItem = (goal) => {
+            this.props.store.dispatch(removeGoalAction(goal.id))
+            return API.deleteGoal(goal.id)
+            .catch(() =>{
               this.props.store.dispatch(removeGoalAction(goal.id))
+              alert("An error happened. Try again")
+              
+            })
+              
           }
 
           render(){
@@ -323,11 +382,24 @@
       class App extends React.Component{
           ComponentDidMount(){
               const { store } = this.props
+
+              
+          Promise.all([
+            API.fetchTodos(),
+            API.fetchGoals()
+          ]).then(([todos, goals]) =>{
+            store.dispatch(receiveDataAction(todos, goals))
+          })
               store.subscribe(() => this.forceUpdate())
           }
+
           render(){
               const { store } = this.props
-              const { todos, goals } = store.getState()
+              const { todos, goals, loading } = store.getState()
+
+              // if(loading === true){
+              //   return <h3>Loading...</h3>
+              // }
               return(
                   <div>
                   <Todos todos={todos} store={this.props.store}/>
@@ -344,3 +416,4 @@
     </script>
   </body>
 </html>
+
